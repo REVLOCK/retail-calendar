@@ -8,6 +8,7 @@ var types_1 = require("./types");
 var calendar_month_1 = require("./calendar_month");
 var calendar_week_1 = require("./calendar_week");
 var last_day_before_eom_1 = require("./last_day_before_eom");
+var last_day_iso_8601_calendar_1 = require("./last_day_iso_8601_calendar");
 var last_day_nearest_eom_1 = require("./last_day_nearest_eom");
 var first_bow_of_first_month_1 = require("./first_bow_of_first_month");
 var last_day_before_eom_except_leap_year_1 = require("./last_day_before_eom_except_leap_year");
@@ -53,7 +54,7 @@ exports.RetailCalendarFactory = /** @class */ (function () {
         var index = beginningIndex;
         for (var _i = 0, _a = this.getWeekDistribution(); _i < _a.length; _i++) {
             var numberOfWeeks = _a[_i];
-            var quarterOfYear = Math.floor((index - beginningIndex) / 3) + 1;
+            var quarterOfYear = Math.min(Math.floor((index - beginningIndex) / 3) + 1, 4);
             var weeksOfMonth = this.weeks.filter(function (week) { return week.monthOfYear === index; });
             var monthStart = moment_1.default(weeksOfMonth[0].gregorianStartDate);
             var monthEnd = moment_1.default(weeksOfMonth[weeksOfMonth.length - 1].gregorianEndDate);
@@ -79,12 +80,14 @@ exports.RetailCalendarFactory = /** @class */ (function () {
         var weeksInQuarter = 0;
         var weekCount = 0;
         var monthOfYear = 0;
-        for (var monthIndex = 0; monthIndex < 12; monthIndex++) {
+        for (var monthIndex = 0; monthIndex < weekDistribution.length; monthIndex++) {
             var weeksInMonth = weekDistribution[monthIndex];
             if (monthIndex % 3 === 0)
                 weeksInQuarter = weekDistribution
                     .slice(monthIndex, monthIndex + 3)
                     .reduce(function (a, b) { return a + b; }, 0);
+            if (monthIndex === 13)
+                weeksInQuarter += weekDistribution[monthIndex];
             monthOfYear = monthIndex + monthOffset;
             for (var weekInMonth = 0; weekInMonth < weeksInMonth; weekInMonth++) {
                 if (weekIndex === weekCount) {
@@ -118,13 +121,16 @@ exports.RetailCalendarFactory = /** @class */ (function () {
             case types_1.WeekGrouping.Group544:
                 weekDistribution = [5, 4, 4, 5, 4, 4, 5, 4, 4, 5, 4, 4];
                 break;
+            case types_1.WeekGrouping.Group444:
+                weekDistribution = [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4];
+                break;
         }
         if (this.leapYearStrategy === types_1.LeapYearStrategy.AddToPenultimateMonth &&
             this.numberOfWeeks === 53)
-            weekDistribution[10]++;
+            weekDistribution[weekDistribution.length - 2]++;
         if (this.leapYearStrategy === types_1.LeapYearStrategy.AddToLastMonth &&
             this.numberOfWeeks === 53)
-            weekDistribution[11]++;
+            weekDistribution[weekDistribution.length - 1]++;
         return weekDistribution;
     };
     Calendar.prototype.getWeekIndex = function (weekIndex) {
@@ -169,6 +175,8 @@ exports.RetailCalendarFactory = /** @class */ (function () {
                 return new last_day_nearest_eom_1.LastDayNearestEOMStrategy();
             case types_1.WeekCalculation.FirstBOWOfFirstMonth:
                 return new first_bow_of_first_month_1.FirstBOWOfFirstMonth();
+            case types_1.WeekCalculation.ISO_8601:
+                return new last_day_iso_8601_calendar_1.LastDayISO8601Strategy();
         }
     };
     Calendar.prototype.getAdjustedGregorianYear = function (year) {

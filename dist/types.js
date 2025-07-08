@@ -5,6 +5,7 @@ var WeekGrouping;
     WeekGrouping[WeekGrouping["Group445"] = 0] = "Group445";
     WeekGrouping[WeekGrouping["Group544"] = 1] = "Group544";
     WeekGrouping[WeekGrouping["Group454"] = 2] = "Group454";
+    WeekGrouping[WeekGrouping["Group444"] = 3] = "Group444";
 })(WeekGrouping = exports.WeekGrouping || (exports.WeekGrouping = {}));
 var LastDayOfWeek;
 (function (LastDayOfWeek) {
@@ -37,6 +38,7 @@ var WeekCalculation;
     WeekCalculation[WeekCalculation["LastDayBeforeEomExceptLeapYear"] = 1] = "LastDayBeforeEomExceptLeapYear";
     WeekCalculation[WeekCalculation["LastDayNearestEOM"] = 2] = "LastDayNearestEOM";
     WeekCalculation[WeekCalculation["FirstBOWOfFirstMonth"] = 3] = "FirstBOWOfFirstMonth";
+    WeekCalculation[WeekCalculation["ISO_8601"] = 4] = "ISO_8601";
 })(WeekCalculation = exports.WeekCalculation || (exports.WeekCalculation = {}));
 var LeapYearStrategy;
 (function (LeapYearStrategy) {

@@ -2,6 +2,7 @@ export enum WeekGrouping {
   Group445,
   Group544,
   Group454,
+  Group444,
 }
 export enum LastDayOfWeek {
   Monday = 1,
@@ -31,13 +32,14 @@ export enum WeekCalculation {
   LastDayBeforeEomExceptLeapYear,
   LastDayNearestEOM,
   FirstBOWOfFirstMonth,
+  ISO_8601,
 }
 
 export enum LeapYearStrategy {
   Restated,
   DropLastWeek,
   AddToPenultimateMonth,
-  AddToLastMonth
+  AddToLastMonth,
 }
 
 export interface RetailCalendarOptions {

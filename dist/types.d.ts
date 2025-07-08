@@ -1,7 +1,8 @@
 export declare enum WeekGrouping {
     Group445 = 0,
     Group544 = 1,
-    Group454 = 2
+    Group454 = 2,
+    Group444 = 3
 }
 export declare enum LastDayOfWeek {
     Monday = 1,
@@ -30,7 +31,8 @@ export declare enum WeekCalculation {
     LastDayBeforeEOM = 0,
     LastDayBeforeEomExceptLeapYear = 1,
     LastDayNearestEOM = 2,
-    FirstBOWOfFirstMonth = 3
+    FirstBOWOfFirstMonth = 3,
+    ISO_8601 = 4
 }
 export declare enum LeapYearStrategy {
     Restated = 0,

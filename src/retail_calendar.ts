@@ -12,12 +12,13 @@ import {
   WeekGrouping,
 } from './types'
 
-import {CalendarMonth} from './calendar_month'
-import {CalendarWeek} from './calendar_week'
-import {LastDayBeforeEOMStrategy} from './last_day_before_eom'
-import {LastDayNearestEOMStrategy} from './last_day_nearest_eom'
-import {FirstBOWOfFirstMonth} from './first_bow_of_first_month'
-import {LastDayBeforeEOMExceptLeapYearStrategy} from './last_day_before_eom_except_leap_year'
+import { CalendarMonth } from './calendar_month'
+import { CalendarWeek } from './calendar_week'
+import { LastDayBeforeEOMStrategy } from './last_day_before_eom'
+import { LastDayISO8601Strategy } from './last_day_iso_8601_calendar'
+import { LastDayNearestEOMStrategy } from './last_day_nearest_eom'
+import { FirstBOWOfFirstMonth } from './first_bow_of_first_month'
+import { LastDayBeforeEOMExceptLeapYearStrategy } from './last_day_before_eom_except_leap_year'
 
 export const RetailCalendarFactory: RetailCalendarConstructor = class Calendar
   implements RetailCalendar {
@@ -89,7 +90,10 @@ export const RetailCalendarFactory: RetailCalendarConstructor = class Calendar
     let index = beginningIndex
 
     for (const numberOfWeeks of this.getWeekDistribution()) {
-      const quarterOfYear = Math.floor((index - beginningIndex) / 3) + 1
+      const quarterOfYear = Math.min(
+        Math.floor((index - beginningIndex) / 3) + 1,
+        4,
+      )
       const weeksOfMonth = this.weeks.filter(
         (week) => week.monthOfYear === index,
       )
@@ -150,13 +154,19 @@ export const RetailCalendarFactory: RetailCalendarConstructor = class Calendar
     let weekCount = 0
     let monthOfYear = 0
 
-    for (let monthIndex = 0; monthIndex < 12; monthIndex++) {
+    for (
+      let monthIndex = 0;
+      monthIndex < weekDistribution.length;
+      monthIndex++
+    ) {
       const weeksInMonth = weekDistribution[monthIndex]
 
       if (monthIndex % 3 === 0)
         weeksInQuarter = weekDistribution
           .slice(monthIndex, monthIndex + 3)
           .reduce((a, b) => a + b, 0)
+
+      if (monthIndex === 13) weeksInQuarter += weekDistribution[monthIndex]
 
       monthOfYear = monthIndex + monthOffset
 
@@ -196,19 +206,22 @@ export const RetailCalendarFactory: RetailCalendarConstructor = class Calendar
       case WeekGrouping.Group544:
         weekDistribution = [5, 4, 4, 5, 4, 4, 5, 4, 4, 5, 4, 4]
         break
+      case WeekGrouping.Group444:
+        weekDistribution = [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]
+        break
     }
 
     if (
       this.leapYearStrategy === LeapYearStrategy.AddToPenultimateMonth &&
       this.numberOfWeeks === 53
     )
-      weekDistribution[10]++
+      weekDistribution[weekDistribution.length - 2]++
 
     if (
-        this.leapYearStrategy === LeapYearStrategy.AddToLastMonth &&
-        this.numberOfWeeks === 53
+      this.leapYearStrategy === LeapYearStrategy.AddToLastMonth &&
+      this.numberOfWeeks === 53
     )
-      weekDistribution[11]++
+      weekDistribution[weekDistribution.length - 1]++
 
     return weekDistribution
   }
@@ -270,6 +283,8 @@ export const RetailCalendarFactory: RetailCalendarConstructor = class Calendar
         return new LastDayNearestEOMStrategy()
       case WeekCalculation.FirstBOWOfFirstMonth:
         return new FirstBOWOfFirstMonth()
+      case WeekCalculation.ISO_8601:
+        return new LastDayISO8601Strategy()
     }
   }
 

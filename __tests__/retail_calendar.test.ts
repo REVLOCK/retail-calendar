@@ -15,6 +15,7 @@ import { nrf2018, nrf2017Restated } from './data/nrf_2018'
 import { firstBow } from './data/first_bow'
 import moment from 'moment'
 import { lastDayBeforeEomExceptLeapYear } from './data/last_day_before_eom_except_leap_year';
+import { group_444 } from './data/group_444';
 
 const DayComparisonFormat = 'YYYY-MM-DD'
 
@@ -482,6 +483,32 @@ describe('RetailCalendar', () => {
         }
       }
       
+    })
+  })
+
+  describe('given group 444 with 13 period calendar config', ()=> {
+
+    it('it matches example calendar', ()=> {
+      const options = {
+        weekGrouping: WeekGrouping.Group444,
+        lastDayOfWeek: LastDayOfWeek.Saturday,
+        lastMonthOfYear: LastMonthOfYear.December,
+        weekCalculation: WeekCalculation.ISO_8601,
+        leapYearStrategy: LeapYearStrategy.AddToLastMonth
+      }
+    
+      for (const yearData of group_444) {
+        const calendar = new RetailCalendarFactory(options, yearData.year)
+        expect(calendar.numberOfWeeks).toEqual(yearData.numberOfWeeks)
+        for (const month of yearData.months) {
+          const calendarMonth = calendar.months[month.monthOfYear]
+          expect(moment(calendarMonth.gregorianStartDate).format(DayComparisonFormat))
+            .toEqual(month.start)
+          expect(moment(calendarMonth.gregorianEndDate).format(DayComparisonFormat)).toEqual(
+            month.end
+          )
+        }
+      }
     })
   })
 })
