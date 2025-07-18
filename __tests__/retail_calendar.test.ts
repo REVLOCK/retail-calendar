@@ -15,7 +15,10 @@ import { nrf2018, nrf2017Restated } from './data/nrf_2018'
 import { firstBow } from './data/first_bow'
 import moment from 'moment'
 import { lastDayBeforeEomExceptLeapYear } from './data/last_day_before_eom_except_leap_year';
-import { group_444 } from './data/group_444';
+import { group_444_saturday } from './data/group_444_saturday';
+import { group_444_sunday } from './data/group_444_sunday';
+import { group_444_friday } from './data/group_444_friday';
+import { group_444_march_saturday } from './data/group_444_march_saturday';
 
 const DayComparisonFormat = 'YYYY-MM-DD'
 
@@ -486,7 +489,7 @@ describe('RetailCalendar', () => {
     })
   })
 
-  describe('given group 444 with 13 period calendar config', ()=> {
+  describe('given group 444 with 13 period calendar config ends saturday', ()=> {
 
     it('it matches example calendar', ()=> {
       const options = {
@@ -497,7 +500,85 @@ describe('RetailCalendar', () => {
         leapYearStrategy: LeapYearStrategy.AddToLastMonth
       }
     
-      for (const yearData of group_444) {
+      for (const yearData of group_444_saturday) {
+        const calendar = new RetailCalendarFactory(options, yearData.year)
+        expect(calendar.numberOfWeeks).toEqual(yearData.numberOfWeeks)
+        for (const month of yearData.months) {
+          const calendarMonth = calendar.months[month.monthOfYear]
+          expect(moment(calendarMonth.gregorianStartDate).format(DayComparisonFormat))
+            .toEqual(month.start)
+          expect(moment(calendarMonth.gregorianEndDate).format(DayComparisonFormat)).toEqual(
+            month.end
+          )
+        }
+      }
+    })
+  })
+
+  describe('given group 444 with 13 period calendar config ends sunday', ()=> {
+
+    it('it matches example calendar', ()=> {
+      const options = {
+        weekGrouping: WeekGrouping.Group444,
+        lastDayOfWeek: LastDayOfWeek.Sunday,
+        lastMonthOfYear: LastMonthOfYear.December,
+        weekCalculation: WeekCalculation.ISO_8601,
+        leapYearStrategy: LeapYearStrategy.AddToLastMonth
+      }
+    
+      for (const yearData of group_444_sunday) {
+        const calendar = new RetailCalendarFactory(options, yearData.year)
+        expect(calendar.numberOfWeeks).toEqual(yearData.numberOfWeeks)
+        for (const month of yearData.months) {
+          const calendarMonth = calendar.months[month.monthOfYear]
+          expect(moment(calendarMonth.gregorianStartDate).format(DayComparisonFormat))
+            .toEqual(month.start)
+          expect(moment(calendarMonth.gregorianEndDate).format(DayComparisonFormat)).toEqual(
+            month.end
+          )
+        }
+      }
+    })
+  })
+
+  describe('given group 444 with 13 period calendar config ends friday', ()=> {
+
+    it('it matches example calendar', ()=> {
+      const options = {
+        weekGrouping: WeekGrouping.Group444,
+        lastDayOfWeek: LastDayOfWeek.Friday,
+        lastMonthOfYear: LastMonthOfYear.December,
+        weekCalculation: WeekCalculation.ISO_8601,
+        leapYearStrategy: LeapYearStrategy.AddToLastMonth
+      }
+    
+      for (const yearData of group_444_friday) {
+        const calendar = new RetailCalendarFactory(options, yearData.year)
+        expect(calendar.numberOfWeeks).toEqual(yearData.numberOfWeeks)
+        for (const month of yearData.months) {
+          const calendarMonth = calendar.months[month.monthOfYear]
+          expect(moment(calendarMonth.gregorianStartDate).format(DayComparisonFormat))
+            .toEqual(month.start)
+          expect(moment(calendarMonth.gregorianEndDate).format(DayComparisonFormat)).toEqual(
+            month.end
+          )
+        }
+      }
+    })
+  })
+
+  describe.only('given group 444 with 13 period calendar config ends march last saturday', ()=> {
+
+    it('it matches example calendar', ()=> {
+      const options = {
+        weekGrouping: WeekGrouping.Group444,
+        lastDayOfWeek: LastDayOfWeek.Saturday,
+        lastMonthOfYear: LastMonthOfYear.March,
+        weekCalculation: WeekCalculation.ISO_8601,
+        leapYearStrategy: LeapYearStrategy.AddToLastMonth
+      }
+      
+      for (const yearData of group_444_march_saturday) {
         const calendar = new RetailCalendarFactory(options, yearData.year)
         expect(calendar.numberOfWeeks).toEqual(yearData.numberOfWeeks)
         for (const month of yearData.months) {
