@@ -12,7 +12,7 @@ var LastDayISO8601Strategy = /** @class */ (function () {
         if (lastDayOfGregorianYear.month() === types_1.LastMonthOfYear.December) {
             // Step 1: Get Jan 4 of the *next* Gregorian year
             var jan4NextYear = moment_1.default(lastDayOfGregorianYear.year() + 1 + "-01-04");
-            // Step 2: Go to ISO week 1 of next year, 
+            // Step 2: Go to ISO week 1 of next year,
             // then subtract 1 week to get the *last week* of current ISO year
             var lastIsoWeek = jan4NextYear.isoWeek(1).subtract(1, 'week');
             // Step 3: Move to the desired ISO weekday (default is Sunday = 7)
@@ -20,7 +20,9 @@ var LastDayISO8601Strategy = /** @class */ (function () {
         }
         else {
             // NEW LOGIC: Only return last occurrence of weekday in this month on or before lastDayOfGregorianYear
-            var candidate = lastDayOfGregorianYear.clone().isoWeekday(lastDayOfIsoWeek);
+            var candidate = lastDayOfGregorianYear
+                .clone()
+                .isoWeekday(lastDayOfIsoWeek);
             // If candidate is after lastDayOfGregorianYear, go one week back
             if (candidate.isAfter(lastDayOfGregorianYear)) {
                 candidate.subtract(7, 'days');

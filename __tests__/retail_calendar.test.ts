@@ -19,6 +19,7 @@ import { group_444_saturday } from './data/group_444_saturday';
 import { group_444_sunday } from './data/group_444_sunday';
 import { group_444_friday } from './data/group_444_friday';
 import { group_444_march_saturday } from './data/group_444_march_saturday';
+import { group_444_churchs } from './data/group_444_churchs';
 
 const DayComparisonFormat = 'YYYY-MM-DD'
 
@@ -567,7 +568,7 @@ describe('RetailCalendar', () => {
     })
   })
 
-  describe.only('given group 444 with 13 period calendar config ends march last saturday', ()=> {
+  describe('given group 444 with 13 period calendar config ends march last saturday', ()=> {
 
     it('it matches example calendar', ()=> {
       const options = {
@@ -580,6 +581,33 @@ describe('RetailCalendar', () => {
       
       for (const yearData of group_444_march_saturday) {
         const calendar = new RetailCalendarFactory(options, yearData.year)
+        expect(calendar.numberOfWeeks).toEqual(yearData.numberOfWeeks)
+        for (const month of yearData.months) {
+          const calendarMonth = calendar.months[month.monthOfYear]
+          expect(moment(calendarMonth.gregorianStartDate).format(DayComparisonFormat))
+            .toEqual(month.start)
+          expect(moment(calendarMonth.gregorianEndDate).format(DayComparisonFormat)).toEqual(
+            month.end
+          )
+        }
+      }
+    })
+  })
+
+  describe('given group 444 with 13 period calendar for churchs calendar', ()=> {
+
+    it('it matches example calendar', ()=> {
+      const options = {
+        weekGrouping: WeekGrouping.Group444,
+        lastDayOfWeek: LastDayOfWeek.Sunday,
+        lastMonthOfYear: LastMonthOfYear.December,
+        weekCalculation: WeekCalculation.LastDayBeforeEOM,
+        leapYearStrategy: LeapYearStrategy.AddToLastMonth
+      }
+    
+      for (const yearData of group_444_churchs) {
+        const calendar = new RetailCalendarFactory(options, yearData.year)
+        console.log(`Generated Year ${calendar.year}`)
         expect(calendar.numberOfWeeks).toEqual(yearData.numberOfWeeks)
         for (const month of yearData.months) {
           const calendarMonth = calendar.months[month.monthOfYear]
