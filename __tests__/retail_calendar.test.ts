@@ -20,6 +20,7 @@ import { group_444_sunday } from './data/group_444_sunday';
 import { group_444_friday } from './data/group_444_friday';
 import { group_444_march_saturday } from './data/group_444_march_saturday';
 import { group_444_churchs } from './data/group_444_churchs';
+import { group_client_sunday_last } from './data/group_client_sunday_last';
 
 const DayComparisonFormat = 'YYYY-MM-DD'
 
@@ -608,6 +609,61 @@ describe('RetailCalendar', () => {
       for (const yearData of group_444_churchs) {
         const calendar = new RetailCalendarFactory(options, yearData.year)
         console.log(`Generated Year ${calendar.year}`)
+        expect(calendar.numberOfWeeks).toEqual(yearData.numberOfWeeks)
+        for (const month of yearData.months) {
+          const calendarMonth = calendar.months[month.monthOfYear]
+          expect(moment(calendarMonth.gregorianStartDate).format(DayComparisonFormat))
+            .toEqual(month.start)
+          expect(moment(calendarMonth.gregorianEndDate).format(DayComparisonFormat)).toEqual(
+            month.end
+          )
+        }
+      }
+    })
+  })
+
+  describe('given client calendar with last Sunday of month ending in July', ()=> {
+
+    it('it matches client provided calendar data', ()=> {
+      const options = {
+        weekGrouping: WeekGrouping.Custom,
+        lastDayOfWeek: LastDayOfWeek.Sunday,
+        lastMonthOfYear: LastMonthOfYear.July,
+        weekCalculation: WeekCalculation.LastDayBeforeEOM,
+        leapYearStrategy: LeapYearStrategy.AddToLastMonth,
+        beginningMonthIndex: 7
+      }
+    
+      for (const yearData of group_client_sunday_last) {
+        const calendar = new RetailCalendarFactory(options, yearData.year)
+        
+        // Print header
+        console.log(`\n${'='.repeat(80)}`)
+        console.log(`Client Calendar Year ${calendar.year}`)
+        console.log(`Number of Weeks - Expected: ${yearData.numberOfWeeks}, Actual: ${calendar.numberOfWeeks}`)
+        console.log(`${'='.repeat(80)}`)
+        
+        // Print expected calendar
+        console.log('\nEXPECTED CALENDAR:')
+        console.log(`${'Month'.padEnd(8)} | ${'Start Date'.padEnd(12)} | ${'End Date'.padEnd(12)}`)
+        console.log(`${'-'.repeat(8)} | ${'-'.repeat(12)} | ${'-'.repeat(12)}`)
+        for (const month of yearData.months) {
+          console.log(`${String(month.monthOfYear + 1).padEnd(8)} | ${month.start.padEnd(12)} | ${month.end.padEnd(12)}`)
+        }
+        
+        // Print actual calendar
+        console.log('\nACTUAL CALENDAR:')
+        console.log(`${'Month'.padEnd(8)} | ${'Start Date'.padEnd(12)} | ${'End Date'.padEnd(12)}`)
+        console.log(`${'-'.repeat(8)} | ${'-'.repeat(12)} | ${'-'.repeat(12)}`)
+        for (let i = 0; i < calendar.months.length; i++) {
+          const calendarMonth = calendar.months[i]
+          const actualStart = moment(calendarMonth.gregorianStartDate).format(DayComparisonFormat)
+          const actualEnd = moment(calendarMonth.gregorianEndDate).format(DayComparisonFormat)
+          console.log(`${String(i + 1).padEnd(8)} | ${actualStart.padEnd(12)} | ${actualEnd.padEnd(12)}`)
+        }
+        console.log(`${'='.repeat(80)}\n`)
+        
+        // Perform assertions
         expect(calendar.numberOfWeeks).toEqual(yearData.numberOfWeeks)
         for (const month of yearData.months) {
           const calendarMonth = calendar.months[month.monthOfYear]

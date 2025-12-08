@@ -3,6 +3,7 @@ export enum WeekGrouping {
   Group544,
   Group454,
   Group444,
+  Custom
 }
 export enum LastDayOfWeek {
   Monday = 1,
@@ -47,6 +48,7 @@ export interface RetailCalendarOptions {
   lastDayOfWeek: LastDayOfWeek
   lastMonthOfYear: LastMonthOfYear | number
   weekCalculation: WeekCalculation
+  weekDistribution?: number[]
   /**
    * If LeapYearStrategy.Restated, 53rd week will belong to last month in year. First week won't belong to any month.
    * If LeapYearStrategy.DropLastWeek, 53rd week won't belong to any month in year. First week will belong to the first month.
