@@ -35,7 +35,7 @@ export const RetailCalendarFactory: RetailCalendarConstructor = class Calendar
 
   constructor(calendarOptions: RetailCalendarOptions, year: number) {
     this.year = year
-    this.weekDistribution = calendarOptions.weekDistribution || [4, 5, 4, 4, 4, 5, 4, 4, 5, 4, 4, 5]
+    this.weekDistribution = calendarOptions.weekDistribution || []
     this.options = calendarOptions
     this.calendarYear = this.getAdjustedGregorianYear(year)
     this.leapYearStrategy = this.getLeapYearStrategy()
@@ -213,7 +213,9 @@ export const RetailCalendarFactory: RetailCalendarConstructor = class Calendar
         break
       case WeekGrouping.Custom:
         // For custom groupings with month-aligned calendars, calculate the distribution dynamically
-        weekDistribution = this.calculateDynamicWeekDistribution()
+        weekDistribution = (this.weekDistribution && this.weekDistribution.length > 0) 
+          ? this.weekDistribution : 
+          this.calculateDynamicWeekDistribution()
         break
     }
 

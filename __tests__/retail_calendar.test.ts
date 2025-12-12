@@ -21,6 +21,7 @@ import { group_444_friday } from './data/group_444_friday';
 import { group_444_march_saturday } from './data/group_444_march_saturday';
 import { group_444_churchs } from './data/group_444_churchs';
 import { group_client_sunday_last } from './data/group_client_sunday_last';
+import { marvel_fiscal_calendar } from './data/marvel_fiscal_calendar';
 
 const DayComparisonFormat = 'YYYY-MM-DD'
 
@@ -663,6 +664,62 @@ describe('RetailCalendar', () => {
         }
         console.log(`${'='.repeat(80)}\n`)
         
+        // Perform assertions
+        expect(calendar.numberOfWeeks).toEqual(yearData.numberOfWeeks)
+        for (const month of yearData.months) {
+          const calendarMonth = calendar.months[month.monthOfYear]
+          expect(moment(calendarMonth.gregorianStartDate).format(DayComparisonFormat))
+            .toEqual(month.start)
+          expect(moment(calendarMonth.gregorianEndDate).format(DayComparisonFormat)).toEqual(
+            month.end
+          )
+        }
+      }
+    })
+  })
+
+  describe('given Marvel Fiscal Calendar', () => {
+
+    it('matches Marvel fiscal calendar data for library years 2024-2026 (Marvel FY 2025-2027)', () => {
+      const options = {
+        weekGrouping: WeekGrouping.Custom,
+        lastDayOfWeek: LastDayOfWeek.Saturday,
+        lastMonthOfYear: LastMonthOfYear.September,
+        weekCalculation: WeekCalculation.LastDayNearestEOM,
+        leapYearStrategy: LeapYearStrategy.AddToLastMonth,
+        beginningMonthIndex: 9,
+        weekDistribution: [4, 5, 4, 4, 4, 5, 4, 4, 5, 4, 4, 5]
+      }
+
+      for (const yearData of marvel_fiscal_calendar) {
+        const calendar = new RetailCalendarFactory(options, yearData.year)
+
+        // Print header
+        console.log(`\n${'='.repeat(80)}`)
+        console.log(`Marvel Fiscal Calendar Year ${calendar.year}`)
+        console.log(`Number of Weeks - Expected: ${yearData.numberOfWeeks}, Actual: ${calendar.numberOfWeeks}`)
+        console.log(`${'='.repeat(80)}`)
+
+        // Print expected calendar
+        console.log('\nEXPECTED CALENDAR:')
+        console.log(`${'Month'.padEnd(8)} | ${'Start Date'.padEnd(12)} | ${'End Date'.padEnd(12)}`)
+        console.log(`${'-'.repeat(8)} | ${'-'.repeat(12)} | ${'-'.repeat(12)}`)
+        for (const month of yearData.months) {
+          console.log(`${String(month.monthOfYear + 1).padEnd(8)} | ${month.start.padEnd(12)} | ${month.end.padEnd(12)}`)
+        }
+
+        // Print actual calendar
+        console.log('\nACTUAL CALENDAR:')
+        console.log(`${'Month'.padEnd(8)} | ${'Start Date'.padEnd(12)} | ${'End Date'.padEnd(12)}`)
+        console.log(`${'-'.repeat(8)} | ${'-'.repeat(12)} | ${'-'.repeat(12)}`)
+        for (let i = 0; i < calendar.months.length; i++) {
+          const calendarMonth = calendar.months[i]
+          const actualStart = moment(calendarMonth.gregorianStartDate).format(DayComparisonFormat)
+          const actualEnd = moment(calendarMonth.gregorianEndDate).format(DayComparisonFormat)
+          console.log(`${String(i + 1).padEnd(8)} | ${actualStart.padEnd(12)} | ${actualEnd.padEnd(12)}`)
+        }
+        console.log(`${'='.repeat(80)}\n`)
+
         // Perform assertions
         expect(calendar.numberOfWeeks).toEqual(yearData.numberOfWeeks)
         for (const month of yearData.months) {

@@ -8,7 +8,7 @@
         "runtimeExecutable": "/Users/kazimraza/.nvm/versions/node/v20.10.0/bin/node",
         "program": "${workspaceFolder}/node_modules/.bin/jest",
         "args": [
-          "--testNamePattern=given client calendar with last Sunday of month ending in July",
+          "--testNamePattern=given Marvel Fiscal Calendar",
           "--runInBand"
         ],
         "console": "integratedTerminal",
