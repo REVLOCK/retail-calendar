@@ -6,6 +6,7 @@ var WeekGrouping;
     WeekGrouping[WeekGrouping["Group544"] = 1] = "Group544";
     WeekGrouping[WeekGrouping["Group454"] = 2] = "Group454";
     WeekGrouping[WeekGrouping["Group444"] = 3] = "Group444";
+    WeekGrouping[WeekGrouping["Custom"] = 4] = "Custom";
 })(WeekGrouping = exports.WeekGrouping || (exports.WeekGrouping = {}));
 var LastDayOfWeek;
 (function (LastDayOfWeek) {

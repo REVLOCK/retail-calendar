@@ -15,6 +15,7 @@ var last_day_before_eom_except_leap_year_1 = require("./last_day_before_eom_exce
 exports.RetailCalendarFactory = /** @class */ (function () {
     function Calendar(calendarOptions, year) {
         this.year = year;
+        this.weekDistribution = calendarOptions.weekDistribution || [];
         this.options = calendarOptions;
         this.calendarYear = this.getAdjustedGregorianYear(year);
         this.leapYearStrategy = this.getLeapYearStrategy();
@@ -124,6 +125,12 @@ exports.RetailCalendarFactory = /** @class */ (function () {
             case types_1.WeekGrouping.Group444:
                 weekDistribution = [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4];
                 break;
+            case types_1.WeekGrouping.Custom:
+                // For custom groupings with month-aligned calendars, calculate the distribution dynamically
+                weekDistribution = (this.weekDistribution && this.weekDistribution.length > 0)
+                    ? this.weekDistribution :
+                    this.calculateDynamicWeekDistribution();
+                break;
         }
         if (this.leapYearStrategy === types_1.LeapYearStrategy.AddToPenultimateMonth &&
             this.numberOfWeeks === 53)
@@ -132,6 +139,48 @@ exports.RetailCalendarFactory = /** @class */ (function () {
             this.numberOfWeeks === 53)
             weekDistribution[weekDistribution.length - 1]++;
         return weekDistribution;
+    };
+    Calendar.prototype.calculateDynamicWeekDistribution = function () {
+        // Logic: Each retail month ends on the last occurrence of lastDayOfWeek (e.g., Sunday) in the Gregorian month.
+        // The retail month starts the day after the last lastDayOfWeek of the previous Gregorian month.
+        // Number of weeks = (lastDayOfWeek of this month - lastDayOfWeek of previous month) / 7
+        var weekDistribution = [];
+        var startingMonthOfYear = this.getBeginningOfMonthIndex(); // e.g., 7 for August (0-indexed)
+        var lastDayOfWeek = this.options.lastDayOfWeek; // e.g., Sunday = 7
+        for (var i = 0; i < 12; i++) {
+            // Calculate the Gregorian month index (0-11)
+            var gregorianMonthIndex = (startingMonthOfYear + i) % 12;
+            // Determine the Gregorian year for this month
+            // Before we wrap past December, use calendarYear - 1
+            // After we wrap past December, use calendarYear
+            var gregorianYear = this.calendarYear - 1;
+            if (startingMonthOfYear + i >= 12) {
+                gregorianYear = this.calendarYear;
+            }
+            // Find the last occurrence of lastDayOfWeek in this Gregorian month
+            var lastDayOfWeekThisMonth = this.getLastDayOfWeekInMonth(gregorianYear, gregorianMonthIndex, lastDayOfWeek);
+            // Find the last occurrence of lastDayOfWeek in the previous Gregorian month
+            var prevMonthIndex = (gregorianMonthIndex - 1 + 12) % 12;
+            var prevGregorianYear = gregorianYear;
+            if (gregorianMonthIndex === 0) {
+                // January, so previous month (December) is in previous year
+                prevGregorianYear = gregorianYear - 1;
+            }
+            var lastDayOfWeekPrevMonth = this.getLastDayOfWeekInMonth(prevGregorianYear, prevMonthIndex, lastDayOfWeek);
+            // Number of weeks = difference in weeks
+            var numWeeks = lastDayOfWeekThisMonth.diff(lastDayOfWeekPrevMonth, 'weeks');
+            weekDistribution.push(numWeeks);
+        }
+        return weekDistribution;
+    };
+    Calendar.prototype.getLastDayOfWeekInMonth = function (year, monthIndex, targetDayOfWeek) {
+        // Get the last day of the month
+        var lastDayOfMonth = moment_1.default().year(year).month(monthIndex).endOf('month').startOf('day');
+        // Get the ISO weekday of the last day (1 = Monday, 7 = Sunday)
+        var lastDayWeekday = lastDayOfMonth.isoWeekday();
+        // Calculate how many days to go back to reach the target day of week
+        var daysToSubtract = (lastDayWeekday - targetDayOfWeek + 7) % 7;
+        return lastDayOfMonth.subtract(daysToSubtract, 'days');
     };
     Calendar.prototype.getWeekIndex = function (weekIndex) {
         if (this.numberOfWeeks !== 53) {
