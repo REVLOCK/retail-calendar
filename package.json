@@ -25,10 +25,10 @@
     "lint-fix": "tslint --fix -p tsconfig.json",
     "build": "tsc",
     "test": "jest",
-    "prepublishOnly": "npm test && npm run lint",
-    "preversion": "npm run lint",
-    "version": "npm run format && git add -A src",
-    "postversion": "git push && git push --tags"
+    "prepublishOnly": "npm test && npm run lint --ignore-scripts",
+    "preversion": "npm run lint --ignore-scripts",
+    "version": "npm run format && git add -A src --ignore-scripts",
+    "postversion": "git push && git push --tags --ignore-scripts"
   },
   "devDependencies": {
     "@types/jest": "^27.4.1",
