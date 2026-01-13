@@ -27,7 +27,27 @@ exports.RetailCalendarFactory = /** @class */ (function () {
             .startOf('day');
         this.weeks = this.generateWeeks();
         this.months = this.generateMonths();
+        this.normalizeMonthOfYearForCustomCalendar();
     }
+    Calendar.prototype.normalizeMonthOfYearForCustomCalendar = function () {
+        var isCustomCalendar = this.options.weekGrouping === types_1.WeekGrouping.Custom;
+        var beginningMonthIndex = this.options.beginningMonthIndex;
+        if (isCustomCalendar &&
+            beginningMonthIndex !== undefined &&
+            beginningMonthIndex !== 1) {
+            var offset = beginningMonthIndex - 1;
+            // Normalize monthOfYear in weeks
+            for (var _i = 0, _a = this.weeks; _i < _a.length; _i++) {
+                var week = _a[_i];
+                week.monthOfYear = week.monthOfYear - offset;
+            }
+            // Normalize monthOfYear in months
+            for (var _b = 0, _c = this.months; _b < _c.length; _b++) {
+                var month = _c[_b];
+                month.monthOfYear = month.monthOfYear - offset;
+            }
+        }
+    };
     Calendar.prototype.getLeapYearStrategy = function () {
         if (this.options.restated === undefined &&
             this.options.leapYearStrategy === undefined) {
@@ -127,9 +147,10 @@ exports.RetailCalendarFactory = /** @class */ (function () {
                 break;
             case types_1.WeekGrouping.Custom:
                 // For custom groupings with month-aligned calendars, calculate the distribution dynamically
-                weekDistribution = (this.weekDistribution && this.weekDistribution.length > 0)
-                    ? this.weekDistribution :
-                    this.calculateDynamicWeekDistribution();
+                weekDistribution =
+                    this.weekDistribution && this.weekDistribution.length > 0
+                        ? this.weekDistribution
+                        : this.calculateDynamicWeekDistribution();
                 break;
         }
         if (this.leapYearStrategy === types_1.LeapYearStrategy.AddToPenultimateMonth &&
@@ -175,7 +196,11 @@ exports.RetailCalendarFactory = /** @class */ (function () {
     };
     Calendar.prototype.getLastDayOfWeekInMonth = function (year, monthIndex, targetDayOfWeek) {
         // Get the last day of the month
-        var lastDayOfMonth = moment_1.default().year(year).month(monthIndex).endOf('month').startOf('day');
+        var lastDayOfMonth = moment_1.default()
+            .year(year)
+            .month(monthIndex)
+            .endOf('month')
+            .startOf('day');
         // Get the ISO weekday of the last day (1 = Monday, 7 = Sunday)
         var lastDayWeekday = lastDayOfMonth.isoWeekday();
         // Calculate how many days to go back to reach the target day of week

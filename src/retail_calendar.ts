@@ -47,6 +47,30 @@ export const RetailCalendarFactory: RetailCalendarConstructor = class Calendar
       .startOf('day')
     this.weeks = this.generateWeeks()
     this.months = this.generateMonths()
+    this.normalizeMonthOfYearForCustomCalendar()
+  }
+
+  normalizeMonthOfYearForCustomCalendar(): void {
+    const isCustomCalendar = this.options.weekGrouping === WeekGrouping.Custom
+    const beginningMonthIndex = this.options.beginningMonthIndex
+
+    if (
+      isCustomCalendar &&
+      beginningMonthIndex !== undefined &&
+      beginningMonthIndex !== 1
+    ) {
+      const offset = beginningMonthIndex - 1
+
+      // Normalize monthOfYear in weeks
+      for (const week of this.weeks) {
+        week.monthOfYear = week.monthOfYear - offset
+      }
+
+      // Normalize monthOfYear in months
+      for (const month of this.months) {
+        month.monthOfYear = month.monthOfYear - offset
+      }
+    }
   }
 
   getLeapYearStrategy() {
@@ -213,9 +237,10 @@ export const RetailCalendarFactory: RetailCalendarConstructor = class Calendar
         break
       case WeekGrouping.Custom:
         // For custom groupings with month-aligned calendars, calculate the distribution dynamically
-        weekDistribution = (this.weekDistribution && this.weekDistribution.length > 0) 
-          ? this.weekDistribution : 
-          this.calculateDynamicWeekDistribution()
+        weekDistribution =
+          this.weekDistribution && this.weekDistribution.length > 0
+            ? this.weekDistribution
+            : this.calculateDynamicWeekDistribution()
         break
     }
 
@@ -238,7 +263,7 @@ export const RetailCalendarFactory: RetailCalendarConstructor = class Calendar
     // Logic: Each retail month ends on the last occurrence of lastDayOfWeek (e.g., Sunday) in the Gregorian month.
     // The retail month starts the day after the last lastDayOfWeek of the previous Gregorian month.
     // Number of weeks = (lastDayOfWeek of this month - lastDayOfWeek of previous month) / 7
-    
+
     const weekDistribution: number[] = []
     const startingMonthOfYear = this.getBeginningOfMonthIndex() // e.g., 7 for August (0-indexed)
     const lastDayOfWeek = this.options.lastDayOfWeek // e.g., Sunday = 7
@@ -246,7 +271,7 @@ export const RetailCalendarFactory: RetailCalendarConstructor = class Calendar
     for (let i = 0; i < 12; i++) {
       // Calculate the Gregorian month index (0-11)
       const gregorianMonthIndex = (startingMonthOfYear + i) % 12
-      
+
       // Determine the Gregorian year for this month
       // Before we wrap past December, use calendarYear - 1
       // After we wrap past December, use calendarYear
@@ -254,10 +279,14 @@ export const RetailCalendarFactory: RetailCalendarConstructor = class Calendar
       if (startingMonthOfYear + i >= 12) {
         gregorianYear = this.calendarYear
       }
-      
+
       // Find the last occurrence of lastDayOfWeek in this Gregorian month
-      const lastDayOfWeekThisMonth = this.getLastDayOfWeekInMonth(gregorianYear, gregorianMonthIndex, lastDayOfWeek)
-      
+      const lastDayOfWeekThisMonth = this.getLastDayOfWeekInMonth(
+        gregorianYear,
+        gregorianMonthIndex,
+        lastDayOfWeek,
+      )
+
       // Find the last occurrence of lastDayOfWeek in the previous Gregorian month
       const prevMonthIndex = (gregorianMonthIndex - 1 + 12) % 12
       let prevGregorianYear = gregorianYear
@@ -265,27 +294,42 @@ export const RetailCalendarFactory: RetailCalendarConstructor = class Calendar
         // January, so previous month (December) is in previous year
         prevGregorianYear = gregorianYear - 1
       }
-      
-      const lastDayOfWeekPrevMonth = this.getLastDayOfWeekInMonth(prevGregorianYear, prevMonthIndex, lastDayOfWeek)
-      
+
+      const lastDayOfWeekPrevMonth = this.getLastDayOfWeekInMonth(
+        prevGregorianYear,
+        prevMonthIndex,
+        lastDayOfWeek,
+      )
+
       // Number of weeks = difference in weeks
-      const numWeeks = lastDayOfWeekThisMonth.diff(lastDayOfWeekPrevMonth, 'weeks')
+      const numWeeks = lastDayOfWeekThisMonth.diff(
+        lastDayOfWeekPrevMonth,
+        'weeks',
+      )
       weekDistribution.push(numWeeks)
     }
 
     return weekDistribution
   }
 
-  getLastDayOfWeekInMonth(year: number, monthIndex: number, targetDayOfWeek: number): moment.Moment {
+  getLastDayOfWeekInMonth(
+    year: number,
+    monthIndex: number,
+    targetDayOfWeek: number,
+  ): moment.Moment {
     // Get the last day of the month
-    const lastDayOfMonth = moment().year(year).month(monthIndex).endOf('month').startOf('day')
-    
+    const lastDayOfMonth = moment()
+      .year(year)
+      .month(monthIndex)
+      .endOf('month')
+      .startOf('day')
+
     // Get the ISO weekday of the last day (1 = Monday, 7 = Sunday)
     const lastDayWeekday = lastDayOfMonth.isoWeekday()
-    
+
     // Calculate how many days to go back to reach the target day of week
     const daysToSubtract = (lastDayWeekday - targetDayOfWeek + 7) % 7
-    
+
     return lastDayOfMonth.subtract(daysToSubtract, 'days')
   }
 
