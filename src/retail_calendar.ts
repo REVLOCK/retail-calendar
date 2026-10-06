@@ -119,7 +119,7 @@ export const RetailCalendarFactory: RetailCalendarConstructor = class Calendar
     const beginningIndex = this.getBeginningOfMonthIndex()
     let index = beginningIndex
 
-    for (const _ of this.getWeekDistribution()) {
+    for (const numberOfWeeks of this.getWeekDistribution()) {
       const quarterOfYear = Math.min(
         Math.floor((index - beginningIndex) / 3) + 1,
         4,
@@ -135,7 +135,7 @@ export const RetailCalendarFactory: RetailCalendarConstructor = class Calendar
         new CalendarMonth(
           index,
           quarterOfYear,
-          weeksOfMonth.length,
+          numberOfWeeks,
           weeksOfMonth,
           monthStart.toDate(),
           monthEnd.toDate(),

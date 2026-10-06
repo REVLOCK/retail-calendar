@@ -83,12 +83,12 @@ exports.RetailCalendarFactory = /** @class */ (function () {
         var beginningIndex = this.getBeginningOfMonthIndex();
         var index = beginningIndex;
         for (var _i = 0, _a = this.getWeekDistribution(); _i < _a.length; _i++) {
-            var _ = _a[_i];
+            var numberOfWeeks = _a[_i];
             var quarterOfYear = Math.min(Math.floor((index - beginningIndex) / 3) + 1, 4);
             var weeksOfMonth = this.weeks.filter(function (week) { return week.monthOfYear === index; });
             var monthStart = moment_1.default(weeksOfMonth[0].gregorianStartDate);
             var monthEnd = moment_1.default(weeksOfMonth[weeksOfMonth.length - 1].gregorianEndDate);
-            months.push(new calendar_month_1.CalendarMonth(index, quarterOfYear, weeksOfMonth.length, weeksOfMonth, monthStart.toDate(), monthEnd.toDate()));
+            months.push(new calendar_month_1.CalendarMonth(index, quarterOfYear, numberOfWeeks, weeksOfMonth, monthStart.toDate(), monthEnd.toDate()));
             index += 1;
         }
         return months;
