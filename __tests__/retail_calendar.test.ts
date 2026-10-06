@@ -732,5 +732,54 @@ describe('RetailCalendar', () => {
         }
       }
     })
+
+    const marvelCalendarOptions: RetailCalendarOptions = {
+      weekGrouping: WeekGrouping.Custom,
+      lastDayOfWeek: LastDayOfWeek.Saturday,
+      lastMonthOfYear: LastMonthOfYear.September,
+      weekCalculation: WeekCalculation.LastDayNearestEOM,
+      leapYearStrategy: LeapYearStrategy.AddToLastMonth,
+      beginningMonthIndex: 9,
+      weekDistribution: [4, 5, 4, 4, 4, 5, 4, 4, 5, 4, 4, 5],
+    }
+
+    it('does not mutate caller weekDistribution on 53-week years (REV-18096)', () => {
+      const weekDistribution = [4, 5, 4, 4, 4, 5, 4, 4, 5, 4, 4, 5]
+      const options = {
+        ...marvelCalendarOptions,
+        weekDistribution,
+      }
+
+      new RetailCalendarFactory(options, 2025)
+
+      expect(weekDistribution).toEqual([4, 5, 4, 4, 4, 5, 4, 4, 5, 4, 4, 5])
+    })
+
+    it('returns stable week distribution across repeated calls (REV-18096)', () => {
+      const calendar = new RetailCalendarFactory(marvelCalendarOptions, 2025)
+      const first = calendar.getWeekDistribution()
+      const second = calendar.getWeekDistribution()
+
+      expect(first).toEqual(second)
+      expect(first[11]).toBe(6)
+    })
+
+    it('sets month numberOfWeeks to match assigned weeks on 53-week year (REV-18096)', () => {
+      const calendar = new RetailCalendarFactory(marvelCalendarOptions, 2025)
+      const p12 = calendar.months[11]
+
+      expect(calendar.numberOfWeeks).toBe(53)
+      expect(p12.weeks.length).toBe(6)
+      expect(p12.numberOfWeeks).toBe(6)
+      expect(p12.numberOfWeeks * 7).toBe(42)
+    })
+
+    it('sets month numberOfWeeks to match assigned weeks on 52-week year', () => {
+      const calendar = new RetailCalendarFactory(marvelCalendarOptions, 2024)
+
+      for (const month of calendar.months) {
+        expect(month.numberOfWeeks).toBe(month.weeks.length)
+      }
+    })
   })
 })
