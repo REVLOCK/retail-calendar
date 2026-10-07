@@ -32,10 +32,14 @@ export const RetailCalendarFactory: RetailCalendarConstructor = class Calendar
   firstDayOfYear: moment.Moment
   leapYearStrategy: LeapYearStrategy
   weekDistribution: number[]
+  resolvedWeekDistribution: number[] | null
 
   constructor(calendarOptions: RetailCalendarOptions, year: number) {
     this.year = year
-    this.weekDistribution = calendarOptions.weekDistribution || []
+    this.weekDistribution = calendarOptions.weekDistribution
+      ? [...calendarOptions.weekDistribution]
+      : []
+    this.resolvedWeekDistribution = null
     this.options = calendarOptions
     this.calendarYear = this.getAdjustedGregorianYear(year)
     this.leapYearStrategy = this.getLeapYearStrategy()
@@ -220,6 +224,10 @@ export const RetailCalendarFactory: RetailCalendarConstructor = class Calendar
   }
 
   getWeekDistribution(): number[] {
+    if (this.resolvedWeekDistribution !== null) {
+      return this.resolvedWeekDistribution
+    }
+
     let weekDistribution: number[]
 
     switch (this.options.weekGrouping) {
@@ -239,10 +247,12 @@ export const RetailCalendarFactory: RetailCalendarConstructor = class Calendar
         // For custom groupings with month-aligned calendars, calculate the distribution dynamically
         weekDistribution =
           this.weekDistribution && this.weekDistribution.length > 0
-            ? this.weekDistribution
+            ? [...this.weekDistribution]
             : this.calculateDynamicWeekDistribution()
         break
     }
+
+    weekDistribution = [...weekDistribution]
 
     if (
       this.leapYearStrategy === LeapYearStrategy.AddToPenultimateMonth &&
@@ -256,6 +266,7 @@ export const RetailCalendarFactory: RetailCalendarConstructor = class Calendar
     )
       weekDistribution[weekDistribution.length - 1]++
 
+    this.resolvedWeekDistribution = weekDistribution
     return weekDistribution
   }
 

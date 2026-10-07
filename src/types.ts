@@ -79,6 +79,7 @@ export interface RetailCalendar {
   numberOfWeeks: number
   months: RetailCalendarMonth[]
   weeks: RetailCalendarWeek[]
+  getWeekDistribution(): number[]
 }
 
 export interface RetailCalendarWeek {

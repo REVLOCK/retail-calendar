@@ -1,4 +1,11 @@
 "use strict";
+var __spreadArrays = (this && this.__spreadArrays) || function () {
+    for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;
+    for (var r = Array(s), k = 0, i = 0; i < il; i++)
+        for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
+            r[k] = a[j];
+    return r;
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -15,7 +22,9 @@ var last_day_before_eom_except_leap_year_1 = require("./last_day_before_eom_exce
 exports.RetailCalendarFactory = /** @class */ (function () {
     function Calendar(calendarOptions, year) {
         this.year = year;
-        this.weekDistribution = calendarOptions.weekDistribution || [];
+        this.weekDistribution = calendarOptions.weekDistribution
+            ? __spreadArrays(calendarOptions.weekDistribution) : [];
+        this.resolvedWeekDistribution = null;
         this.options = calendarOptions;
         this.calendarYear = this.getAdjustedGregorianYear(year);
         this.leapYearStrategy = this.getLeapYearStrategy();
@@ -131,6 +140,9 @@ exports.RetailCalendarFactory = /** @class */ (function () {
         }
     };
     Calendar.prototype.getWeekDistribution = function () {
+        if (this.resolvedWeekDistribution !== null) {
+            return this.resolvedWeekDistribution;
+        }
         var weekDistribution;
         switch (this.options.weekGrouping) {
             case types_1.WeekGrouping.Group445:
@@ -149,16 +161,17 @@ exports.RetailCalendarFactory = /** @class */ (function () {
                 // For custom groupings with month-aligned calendars, calculate the distribution dynamically
                 weekDistribution =
                     this.weekDistribution && this.weekDistribution.length > 0
-                        ? this.weekDistribution
-                        : this.calculateDynamicWeekDistribution();
+                        ? __spreadArrays(this.weekDistribution) : this.calculateDynamicWeekDistribution();
                 break;
         }
+        weekDistribution = __spreadArrays(weekDistribution);
         if (this.leapYearStrategy === types_1.LeapYearStrategy.AddToPenultimateMonth &&
             this.numberOfWeeks === 53)
             weekDistribution[weekDistribution.length - 2]++;
         if (this.leapYearStrategy === types_1.LeapYearStrategy.AddToLastMonth &&
             this.numberOfWeeks === 53)
             weekDistribution[weekDistribution.length - 1]++;
+        this.resolvedWeekDistribution = weekDistribution;
         return weekDistribution;
     };
     Calendar.prototype.calculateDynamicWeekDistribution = function () {
